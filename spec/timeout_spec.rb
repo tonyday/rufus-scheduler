@@ -1,4 +1,3 @@
-
 #
 # Specifying rufus-scheduler
 #
@@ -80,5 +79,27 @@ describe "#{SCHEDULER_CLASS} timeouts" do
     @s.jobs.size.should.equal(0)
     timedout.should.be.false
   end
+
+  it 'should not timeout the second (and subsequent) jobs' do
+
+    count = 0
+    timedout = false
+
+    @s.every '1s', :timeout => '1s' do
+      begin
+        sleep 0.5
+        count += 1
+      rescue Rufus::Scheduler::TimeOutError => e
+        timedout = true
+      end
+    end
+
+    # make sure the job is triggered at least twice
+    sleep 4
+
+    count.should.be >= 2
+    timedout.should.be.false
+  end
+
 end
 
